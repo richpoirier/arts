@@ -14,8 +14,8 @@ Use:
   assert_rjs :insert_html, :bottom, 'posts'
   assert_rjs :redirect_to, :action => 'list'
   assert_rjs :remove, "post_1", "post_2", "post_3"
-  assert_rjs :replace, :bottom, 'This is something to replace'
-  assert_rjs :replace_html, "This is something for replace_html"
+  assert_rjs :replace, 'completely_replaced_div', '<p>This replaced the div</p>'
+  assert_rjs :replace_html, 'replaceable_div', "This goes inside the div"
   assert_rjs :show, "post_1", "post_2", "post_3"
   assert_rjs :sortable, 'sortable_item'
   assert_rjs :toggle, "post_1", "post_2", "post_3"
