@@ -5,7 +5,7 @@ module Arts
     
   include ActionView::Helpers::UrlHelper
   include ActionView::Helpers::TagHelper
-  
+    
   def assert_rjs(action, *args, &block)
     case action.to_sym
       when :insert_html
@@ -21,18 +21,22 @@ module Arts
   def assert_rjs_insert_html(*args)
     position = args.shift
     item_id = args.shift
-    content = args.shift
-
-    assert lined_response.include?("new Insertion.#{position.to_s.camelize}(\"#{item_id}\", \"#{content}\");"),
-           "No insert_html call found for position: '#{position}' id: '#{item_id}' content: '#{content}'"
+    content = create_generator.send(:arguments_for_call, args)
+    
+        assert lined_response.include?("new Insertion.#{position.to_s.camelize}(\"#{item_id}\", #{content});"),
+           "No insert_html call found for \n" +
+           "     position: '#{position}' id: '#{item_id}' \ncontent: \n" +
+           "#{content}\n" +
+           "in response:\n#{lined_response}"
   end
   
   def assert_rjs_replace_html(*args)
     div = args.shift
-    content = args.shift
+    content = create_generator.send(:arguments_for_call, args.shift)    
     
-    assert lined_response.include?("Element.update(\"#{div}\", \"#{content}\");"), 
-           "No replace_html call found on div: '#{div}' and content: '#{content}'"
+    assert lined_response.include?("Element.update(\"#{div}\", #{content});"), 
+           "No replace_html call found on div: '#{div}' and content: \n#{content}\n" +
+           "in response:\n#{lined_response}"
   end
   
   protected
@@ -47,6 +51,6 @@ module Arts
   end
   
   def generic_error(action, args)
-    "#{action} with args [#{args.join(" ")}] does not show up in response"
+    "#{action} with args [#{args.join(" ")}] does not show up in response:\n#{lined_response}"
   end
 end
