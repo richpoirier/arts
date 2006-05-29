@@ -12,6 +12,8 @@ module Arts
         return assert_rjs_insert_html(*args)
       when :replace_html
         return assert_rjs_replace_html(*args)
+      when :replace
+        return assert_rjs_replace(*args)
       else
         assert lined_response.include?(create_generator.send(action, *args, &block)), 
                generic_error(action, args)
@@ -23,20 +25,42 @@ module Arts
     item_id = args.shift
     content = create_generator.send(:arguments_for_call, args)
     
-        assert lined_response.include?("new Insertion.#{position.to_s.camelize}(\"#{item_id}\", #{content});"),
-           "No insert_html call found for \n" +
-           "     position: '#{position}' id: '#{item_id}' \ncontent: \n" +
-           "#{content}\n" +
-           "in response:\n#{lined_response}"
+    unless content.blank?
+      assert lined_response.include?("new Insertion.#{position.to_s.camelize}(\"#{item_id}\", #{content});"),
+             "No insert_html call found for \n" +
+             "     position: '#{position}' id: '#{item_id}' \ncontent: \n" +
+             "#{content}\n" +
+             "in response:\n#{lined_response}"
+    else
+      assert_match Regexp.new("new Insertion\.#{position.to_s.camelize}(.*#{item_id}.*,.*?);"), 
+                   @response.body
+    end
   end
   
   def assert_rjs_replace_html(*args)
     div = args.shift
-    content = create_generator.send(:arguments_for_call, args.shift)    
+    content = create_generator.send(:arguments_for_call, args) 
+       
+    unless content.blank?
+      assert lined_response.include?("Element.update(\"#{div}\", #{content});"), 
+             "No replace_html call found on div: '#{div}' and content: \n#{content}\n" +
+             "in response:\n#{lined_response}"
+    else
+      assert_match Regexp.new("Element.update(.*#{div}.*,.*?);"), @response.body
+    end
+  end
+  
+  def assert_rjs_replace(*args)
+    div = args.shift
+    content = create_generator.send(:arguments_for_call, args) 
     
-    assert lined_response.include?("Element.update(\"#{div}\", #{content});"), 
-           "No replace_html call found on div: '#{div}' and content: \n#{content}\n" +
-           "in response:\n#{lined_response}"
+    unless content.blank?
+      assert lined_response.include?("Element.replace(\"#{div}\", #{content});"), 
+             "No replace call found on div: '#{div}' and content: \n#{content}\n" +
+             "in response:\n#{lined_response}"
+    else
+      assert_match Regexp.new("Element.replace(.*#{div}.*,.*?);"), @response.body
+    end
   end
   
   protected
