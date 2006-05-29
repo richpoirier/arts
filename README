@@ -4,7 +4,9 @@ To use it, add the line
   include Arts
 to your Test::Unit::TestCase subclass or in your test_helper.rb
 
-Use:
+For a complete tutorial, see http://glu.ttono.us/articles/2006/05/29/guide-test-driven-rjs-with-arts.
+
+Usage:
   assert_rjs :alert, 'Hi!'
   assert_rjs :assign, 'a', '2'
   assert_rjs :call, 'foo', 'bar', 'baz'
