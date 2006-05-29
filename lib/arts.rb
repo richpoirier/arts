@@ -24,7 +24,7 @@ module Arts
     content = args.shift
 
     assert lined_response.include?("new Insertion.#{position.to_s.camelize}(\"#{item_id}\", \"#{content}\");"),
-           generic_error(action, original_args)
+           "No insert_html call found for position: '#{position}' id: '#{item_id}' content: '#{content}'"
   end
   
   def assert_rjs_replace_html(*args)
