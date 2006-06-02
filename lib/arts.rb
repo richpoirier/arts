@@ -7,17 +7,10 @@ module Arts
   include ActionView::Helpers::TagHelper
     
   def assert_rjs(action, *args, &block)
-    case action.to_sym
-      when :insert_html
-        return assert_rjs_insert_html(*args)
-      when :replace_html
-        return assert_rjs_replace_html(*args)
-      when :replace
-        return assert_rjs_replace(*args)
-      else
-        assert lined_response.include?(create_generator.send(action, *args, &block)), 
-               generic_error(action, args)
-    end
+    respond_to?("assert_rjs_#{action}") ?
+      send("assert_rjs_#{action}", *args) :
+      assert(lined_response.include?(create_generator.send(action, *args, &block)), 
+         generic_error(action, args))
   end
   
   def assert_no_rjs(action, *args, &block)
