@@ -1,1 +1,0 @@
-Test::Unit::TestCase.send(:include, Arts)

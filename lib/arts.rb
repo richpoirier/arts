@@ -20,6 +20,10 @@ module Arts
     end
   end
   
+  def assert_no_rjs(action, *args, &block)
+    assert_raises(Test::Unit::AssertionFailedError) { assert_rjs(action, *args, &block) }
+  end
+  
   def assert_rjs_insert_html(*args)
     position = args.shift
     item_id = args.shift
