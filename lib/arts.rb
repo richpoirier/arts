@@ -27,11 +27,7 @@ module Arts
       case content
         when Regexp
           assert_match Regexp.new("new Insertion\.#{position.to_s.camelize}(.*#{item_id}.*,.*#{content.source}.*);"),
-                "No insert_html call found for \n" +
-                "     position: '#{position}' id: '#{item_id}' \ncontent: \n" +
-                "#{content.source}\n" +
-                "in response:\n#{lined_response}"
-          
+                       @response.body
         when String
           assert lined_response.include?("new Insertion.#{position.to_s.camelize}(\"#{item_id}\", #{content});"),
                  "No insert_html call found for \n" +
@@ -49,12 +45,20 @@ module Arts
   
   def assert_rjs_replace_html(*args)
     div = args.shift
-    content = create_generator.send(:arguments_for_call, args) 
+    content = extract_matchable_content(args)
        
     unless content.blank?
-      assert lined_response.include?("Element.update(\"#{div}\", #{content});"), 
-             "No replace_html call found on div: '#{div}' and content: \n#{content}\n" +
-             "in response:\n#{lined_response}"
+      case content
+        when Regexp
+          assert_match Regexp.new("Element.update(.*#{div}.*,.*#{content.source}.*);"),
+                       @response.body
+        when String
+          assert lined_response.include?("Element.update(\"#{div}\", #{content});"), 
+                 "No replace_html call found on div: '#{div}' and content: \n#{content}\n" +
+                 "in response:\n#{lined_response}"
+        else
+          raise "Invalid content type"
+      end
     else
       assert_match Regexp.new("Element.update(.*#{div}.*,.*?);"), @response.body
     end
@@ -62,12 +66,20 @@ module Arts
   
   def assert_rjs_replace(*args)
     div = args.shift
-    content = create_generator.send(:arguments_for_call, args) 
+    content = extract_matchable_content(args)
     
     unless content.blank?
-      assert lined_response.include?("Element.replace(\"#{div}\", #{content});"), 
-             "No replace call found on div: '#{div}' and content: \n#{content}\n" +
-             "in response:\n#{lined_response}"
+      case content
+        when Regexp
+          assert_match Regexp.new("Element.replace(.*#{div}.*,.*#{content.source}.*);"),
+                       @response.body
+        when String
+          assert lined_response.include?("Element.replace(\"#{div}\", #{content});"), 
+                 "No replace call found on div: '#{div}' and content: \n#{content}\n" +
+                 "in response:\n#{lined_response}"
+        else
+          raise "Invalid content type"
+      end
     else
       assert_match Regexp.new("Element.replace(.*#{div}.*,.*?);"), @response.body
     end

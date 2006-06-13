@@ -207,11 +207,11 @@ class ArtsTest < Test::Unit::TestCase
       # Exact content matching
       assert_rjs :insert_html, :bottom, 'content', 'Stuff in the content div'
       # Regex matching
-      assert_rjs :insert_html, :bottom, 'content', /in the/
+      assert_rjs :insert_html, :bottom, 'content', /in.*content/
       
       assert_no_rjs :insert_html, :bottom, 'not_our_div'
       
-      assert_no_rjs :insert_html, :bottom, 'content', /not here hahaha/
+      assert_no_rjs :insert_html, :bottom, 'content', /in.*no content/
     end
     
     assert_raises(Test::Unit::AssertionFailedError) do 
@@ -265,26 +265,45 @@ class ArtsTest < Test::Unit::TestCase
     get :replace
     
     assert_nothing_raised do
+      # No content matching
       assert_rjs :replace, 'person_45'
+      # String content matching
       assert_rjs :replace, 'person_45', '<div>This replaces person_45</div>'
+      # regexp content matching
+      assert_rjs :replace, 'person_45', /<div>.*person_45.*<\/div>/
+      
       assert_no_rjs :replace, 'person_45', '<div>This replaces person_46</div>'
+      
+      assert_no_rjs :replace, 'person_45', /person_46/
     end
     
     assert_raises(Test::Unit::AssertionFailedError) { assert_no_rjs :replace, 'person_45' }
+    assert_raises(Test::Unit::AssertionFailedError) { assert_no_rjs :replace, 'person_45', /person_45/ }
+    assert_raises(Test::Unit::AssertionFailedError) { assert_rjs :replace, 'person_46' }
     assert_raises(Test::Unit::AssertionFailedError) { assert_rjs :replace, 'person_45', 'bad stuff' }
+    assert_raises(Test::Unit::AssertionFailedError) { assert_rjs :replace, 'person_45', /not there/}
   end
   
   def test_replace_html
     get :replace_html
     
     assert_nothing_raised do
+      # No content matching
       assert_rjs :replace_html, 'person_45'
+      # String content matching
       assert_rjs :replace_html, 'person_45', 'This goes inside person_45'
+      # Regexp content matching
+      assert_rjs :replace_html, 'person_45', /goes inside/
+      
       assert_no_rjs :replace_html, 'person_46'
+    
+      assert_no_rjs :replace_html, 'person_45', /doesn't go inside/
     end
     
     assert_raises(Test::Unit::AssertionFailedError) { assert_no_rjs :replace_html, 'person_45' }
+    assert_raises(Test::Unit::AssertionFailedError) { assert_no_rjs :replace_html, 'person_45', /goes/ }
     assert_raises(Test::Unit::AssertionFailedError) { assert_rjs :replace_html, 'person_46' }
+    assert_raises(Test::Unit::AssertionFailedError) { assert_rjs :replace_html, 'person_45', /gos inside/ }
   end
   
   def test_show

@@ -1,9 +1,5 @@
 ARTS is Another RJS Test System
 
-To use it, add the line
-  include Arts
-to your Test::Unit::TestCase subclass or in your test_helper.rb
-
 For a complete tutorial, see http://glu.ttono.us/articles/2006/05/29/guide-test-driven-rjs-with-arts.
 
 Usage:
@@ -16,7 +12,9 @@ Usage:
   assert_rjs :insert_html, :bottom, 'posts'
   assert_rjs :redirect_to, :action => 'list'
   assert_rjs :remove, "post_1", "post_2", "post_3"
+  assert_rjs :replace, 'completely_replaced_div'
   assert_rjs :replace, 'completely_replaced_div', '<p>This replaced the div</p>'
+  assert_rjs :replace, 'completely_replaced_div', /replaced the div/
   assert_rjs :replace_html, 'replaceable_div', "This goes inside the div"
   assert_rjs :show, "post_1", "post_2", "post_3"
   assert_rjs :sortable, 'sortable_item'
