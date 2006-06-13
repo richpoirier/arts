@@ -20,14 +20,27 @@ module Arts
   def assert_rjs_insert_html(*args)
     position = args.shift
     item_id = args.shift
-    content = create_generator.send(:arguments_for_call, args)
+    
+    content = extract_matchable_content(args)
     
     unless content.blank?
-      assert lined_response.include?("new Insertion.#{position.to_s.camelize}(\"#{item_id}\", #{content});"),
-             "No insert_html call found for \n" +
-             "     position: '#{position}' id: '#{item_id}' \ncontent: \n" +
-             "#{content}\n" +
-             "in response:\n#{lined_response}"
+      case content
+        when Regexp
+          assert_match Regexp.new("new Insertion\.#{position.to_s.camelize}(.*#{item_id}.*,.*#{content.source}.*);"),
+                "No insert_html call found for \n" +
+                "     position: '#{position}' id: '#{item_id}' \ncontent: \n" +
+                "#{content.source}\n" +
+                "in response:\n#{lined_response}"
+          
+        when String
+          assert lined_response.include?("new Insertion.#{position.to_s.camelize}(\"#{item_id}\", #{content});"),
+                 "No insert_html call found for \n" +
+                 "     position: '#{position}' id: '#{item_id}' \ncontent: \n" +
+                 "#{content}\n" +
+                 "in response:\n#{lined_response}"
+        else
+          raise "Invalid content type"
+      end
     else
       assert_match Regexp.new("new Insertion\.#{position.to_s.camelize}(.*#{item_id}.*,.*?);"), 
                    @response.body
@@ -73,5 +86,13 @@ module Arts
   
   def generic_error(action, args)
     "#{action} with args [#{args.join(" ")}] does not show up in response:\n#{lined_response}"
+  end
+  
+  def extract_matchable_content(args)
+    if args.size == 1 and args.first.is_a? Regexp
+      return args.first
+    else
+      return create_generator.send(:arguments_for_call, args)
+    end
   end
 end

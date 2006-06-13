@@ -202,9 +202,16 @@ class ArtsTest < Test::Unit::TestCase
     
     
     assert_nothing_raised do
+      # No content matching
       assert_rjs :insert_html, :bottom, 'content'
+      # Exact content matching
       assert_rjs :insert_html, :bottom, 'content', 'Stuff in the content div'
+      # Regex matching
+      assert_rjs :insert_html, :bottom, 'content', /in the/
+      
       assert_no_rjs :insert_html, :bottom, 'not_our_div'
+      
+      assert_no_rjs :insert_html, :bottom, 'content', /not here hahaha/
     end
     
     assert_raises(Test::Unit::AssertionFailedError) do 
@@ -213,6 +220,10 @@ class ArtsTest < Test::Unit::TestCase
     
     assert_raises(Test::Unit::AssertionFailedError) do 
       assert_rjs :insert_html, :bottom, 'no_content'
+    end
+    
+    assert_raises(Test::Unit::AssertionFailedError) do 
+      assert_no_rjs :insert_html, :bottom, 'content', /in the/
     end
   end
   
